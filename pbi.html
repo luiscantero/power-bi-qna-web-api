@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+
+<head>
+    <title></title>
+</head>
+
+<body>
+    <div id="qnaContainer" style="width: 600px;height: 600px;"></div>
+    <script>
+        var qna;
+
+        window.onload = function () {
+            var txtAccessToken = "<TOKEN>";
+            var txtEmbedUrl = "<EMBED_URL>";
+            var txtDatasetId = "<DATASET>";
+            var initialQuery = "<INITIAL_QUERY>";
+            var qnaMode = "ResultOnly";
+
+            // Get models. models contains enums that can be used.
+            var models = window["powerbi-client"].models;
+
+            // Embed configuration used to describe the what and how to embed.
+            // This object is used when calling powerbi.embed.
+            // You can find more information at https://github.com/Microsoft/PowerBI-JavaScript/wiki/Embed-Configuration-Details.
+            var config = {
+                type: "qna",
+                tokenType: models.TokenType.Embed,
+                accessToken: txtAccessToken,
+                embedUrl: txtEmbedUrl,
+                datasetIds: [txtDatasetId],
+                viewMode: models.QnaMode[qnaMode],
+                question: initialQuery,
+            };
+
+            // Get a reference to the embedded QNA HTML element
+            var qnaContainer = document.getElementById("qnaContainer");
+
+            // Embed the QNA and display it within the div container.
+            qna = powerbi.embed(qnaContainer, config);
+            qnaContainer.firstChild.setAttribute("frameBorder", "0"); // Remove border.
+
+            // qna.off removes a given event handler if it exists.
+            qna.off("loaded");
+
+            // qna.on will add an event handler which prints to Log window.
+            // Qna.allowedEvents = ["loaded", "visualRendered"];
+            // https://github.com/Microsoft/PowerBI-JavaScript/blob/master/dist/powerbi.js
+            qna.on("loaded", function (event) {
+                // Currently not working.
+                // https://stackoverflow.com/questions/49432205/power-bi-embedded-qa-events-do-not-fire-is-it-a-bug
+            });
+
+            qna.on("rendered", function(event) {
+                // Currently not working.
+            });
+        }
+
+        function setQuestion(question) {
+            // TODO: When rendered event works, return promise and resolve when event triggered.
+            qna.setQuestion(question);
+            return question;
+        }
+    </script>
+    <script src="https://microsoft.github.io/PowerBI-JavaScript/demo/node_modules/powerbi-client/dist/powerbi.js"></script>
+</body>
+
+</html>
