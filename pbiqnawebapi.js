@@ -3,6 +3,7 @@
 "use strict";
 
 // Config.
+const PORT = 8081;
 const CONFIG = require('./config');
 const RENDER_DELAY = CONFIG.RENDER_DELAY;
 
@@ -51,36 +52,39 @@ app.get('/api/pbiqna/:query', async (req, res) => {
 
     // Red dot data URL for testing (works).
     // writeResponse(res, 200, 'data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==');
-    // Apparently the bot emulator has a limit for data URLs.
     // https://stackoverflow.com/questions/37915171/how-do-i-display-images-in-microsoft-bot-framework-with-only-the-base64-encoded
     // An image can be sent to the bot client directly as a hosted URL,
     // but sending as data URL has the advantage that a "Loading" message can be sent to the user before the
     // Power BI response is ready to be sent.
 });
 
-var server = app.listen(8081, async () => {
-    // Launch puppeteer.
-    console.log('Launching puppeteer ...');
-    browser = await puppeteer.launch(); // For testing: { headless: false }
-    page = await browser.newPage();
+var server = app.listen(PORT, async () => {
+    try {
+        // Launch puppeteer.
+        console.log('Launching puppeteer ...');
+        browser = await puppeteer.launch(); // For testing: { headless: false }
+        page = await browser.newPage();
 
-    console.log('Setting config ...');
-    var html = await readFile('pbi.html');
-    html = html.replace('<EMBED_URL>', CONFIG.EMBED_URL);
-    html = html.replace('<DATASET>', CONFIG.DATASET);
+        console.log('Setting config ...');
+        var html = await readFile('pbi.html');
+        html = html.replace('<EMBED_URL>', CONFIG.EMBED_URL);
+        html = html.replace('<DATASET>', CONFIG.DATASET);
 
-    process.stdout.write('Getting token ... ');
-    // var token = CONFIG.TOKEN; // Get token from config.
-    var token = await getSampleToken(); // Get token from public sample.
-    console.log(`${token.substring(0, 30)}...`);
-    html = html.replace("<TOKEN>", token);
+        process.stdout.write('Getting token ... ');
+        // var token = CONFIG.TOKEN; // Get token from config.
+        var token = await getSampleToken(); // Get token from public sample.
+        console.log(`${token.substring(0, 30)}...`);
+        html = html.replace("<TOKEN>", token);
 
-    html = html.replace("<INITIAL_QUERY>", CONFIG.INITIAL_QUERY);
+        html = html.replace("<INITIAL_QUERY>", CONFIG.INITIAL_QUERY);
 
-    console.log(`Setting content ...`);
-    await page.goto(`data:text/html;charset=UTF-8,${html}`, { waitUntil: 'networkidle0' }); // setContent does not support with waitUntil.
+        console.log(`Setting content ...`);
+        await page.goto(`data:text/html;charset=UTF-8,${html}`, { waitUntil: 'networkidle0' }); // setContent does not support with waitUntil.
+    } catch (e) {
+        console.log("Launch error: " + e);
+    }
 
-    console.log(`Server running at http://${server.address().address}:${server.address().port}/`);
+    console.log(`Server running at http://${server.address().address}:${server.address().port}/api/pbiqna`);
 }).on('error', (err) => {
     console.log(err);
 });
