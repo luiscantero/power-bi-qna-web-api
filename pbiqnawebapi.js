@@ -90,7 +90,7 @@ var server = app.listen(PORT, async () => {
 });
 
 async function getSampleToken() {
-    var sampleQna = await httpGet('https://powerbilivedemobe.azurewebsites.net/api/Datasets/SampleQna');
+    var sampleQna = await httpGet('https://powerbiplaygroundbe.azurewebsites.net/api/Datasets/SampleQna');
     return JSON.parse(sampleQna.toString('utf-8')).embedToken.token;
 }
 
